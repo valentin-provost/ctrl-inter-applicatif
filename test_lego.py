@@ -53,3 +53,18 @@ def test_create_piece(client, prepare_db):
     assert 'tuile 1x2' == piece_actual['name']
     assert 'color' in piece_actual
     assert 'noir' == piece_actual['color']
+
+def test_assign_piece(client, prepare_db):
+    encoded_auth = base64.b64encode(b'test_user').decode('utf-8')
+    headers = {'Authorization': f'Bearer {encoded_auth}'}
+    
+    response = client.post('/pieces/1/assign', json={'model_id': 99}, headers=headers)
+    
+    piece_actual = response.json
+    assert response.status_code == 200
+    assert 'model_id' in piece_actual
+    assert 99 == piece_actual['model_id']
+
+def test_unauthorized_access(client, prepare_db):
+    response = client.post('/pieces', json={'name': 'tuile 1x2', 'color': 'noir'})
+    assert response.status_code == 401
